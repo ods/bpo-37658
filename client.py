@@ -18,11 +18,18 @@ class MyEchoClientProtocol(asyncio.Protocol):
         print('connection_lost', exc)
 
 
-async def create_connection(ssl_obj, timeout=60):
+async def create_connection(ssl_obj):
     loop = asyncio.get_event_loop()
     connector = loop.create_connection(MyEchoClientProtocol, '127.0.0.1', 5000, ssl=ssl_obj)
     connector = asyncio.ensure_future(connector)
-    tr, pr = await asyncio.wait_for(connector, timeout=timeout)
+    try:
+        tr, pr = await connector
+    except asyncio.CancelledError:
+        if connector.done():
+            tr, pr = connector.result()
+            # Uncommenting the following line fixes the problem:
+            # tr.close()
+        raise
     return tr, pr
 
 
@@ -34,7 +41,7 @@ async def test_cancel():
     sc = ssl.create_default_context(ssl.Purpose.SERVER_AUTH, cafile='localhost.crt')
     sc.check_hostname = False
     sc.verify_mode = ssl.CERT_NONE
-    for i in range(10):
+    for _ in range(100):
         timeout = 0.002
         try:
             tr, pr = await main(
