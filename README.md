@@ -1,6 +1,9 @@
 # bpo-37658
 
-An example to reproduce [bpo-37658](https://bugs.python.org/issue37658).
+A research on [bpo-37658](https://bugs.python.org/issue37658).
+
+
+## An example to reproduce
 
 Steps:
 
@@ -34,3 +37,19 @@ On success the output should be like:
     File "~/.pyenv/versions/3.9.4/lib/python3.9/asyncio/base_events.py", line 510, in _check_closed
         raise RuntimeError('Event loop is closed')
     RuntimeError: Event loop is closed
+
+
+## Circular references when using SSL/TLS
+
+Steps:
+
+* Install [objgraph](https://pypi.org/project/objgraph/)
+* Start server: `python server.py`
+* Run client: `python ssl_circular_refs.py`, expected result: the error message as above
+* Uncomment the line `culprit_types.reverse()` and run client again, expected result: no error
+
+As side affect this example produces te following graph of references between culprit objects:
+
+![Object graph](ssl_circular_refs.png)
+
+The example is tuned to get reproducable order of destructor calls to show that we get the error with one order and don't with other.

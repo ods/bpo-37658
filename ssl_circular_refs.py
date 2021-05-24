@@ -30,6 +30,7 @@ async def test():
     res = await connector
     print(res)
 
+
 culprit_types = [
     'asyncio.selector_events._SelectorSocketTransport',
     'asyncio.sslproto._SSLProtocolTransport',
@@ -37,19 +38,20 @@ culprit_types = [
 
 def print_graph():
     # Uncommenting the following line changes the order of desctrucor calls
-    # causing the error to disappear
+    # causing the error to disappear:
     # culprit_types.reverse()
     targets = []
     for culprit_type in culprit_types:
         targets += objgraph.by_type(culprit_type)
         gc.collect(1)
     print(f'Targets: {len(targets)}')
-    objgraph.show_backrefs(targets, filename='graph.png', max_depth=10)
+    objgraph.show_backrefs(targets, filename='ssl_circular_refs.png', max_depth=10)
+
 
 print('Start')
 gc.disable()
 asyncio.run(test())
-# print_graph()
+print_graph()
 print('before collect')
 gc.collect()
 print('The end')
