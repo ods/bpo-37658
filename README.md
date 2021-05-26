@@ -1,9 +1,18 @@
 # bpo-37658
 
-A research on [bpo-37658](https://bugs.python.org/issue37658).
+A research on [bpo-37658 In some cases asyncio.wait_for can lead to socket leak](https://bugs.python.org/issue37658).
+
+Issues with the same reason:
+* [MagicStack/asyncpg#467 Leaked connections caused by timeout on pool.acquire](https://github.com/MagicStack/asyncpg/issues/467)
+* [MagicStack/asyncpg#547 Pool never closes if acquire with timeout is cancelled](https://github.com/MagicStack/asyncpg/issues/547)
 
 
-## An example to reproduce
+## Motivation
+
+The [currently merged fix](https://github.com/python/cpython/pull/21894) caused even more serious problem: [bpo-42130 AsyncIO's wait_for can hide cancellation in a rare race condition](https://bugs.python.org/issue42130).
+
+
+## An example to reproduce reported problem
 
 Steps:
 
